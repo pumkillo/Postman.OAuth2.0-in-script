@@ -20,22 +20,6 @@ class ServiceConfig {
     return pm.collectionVariables.get(this.token_name);
   }
 
-  // Get client_id from collection variables
-  static get coll_client_id() {
-    if (pm.collectionVariables.get("client_id") === undefined) {
-      pm.collectionVariables.set("client_id", "");
-    }
-    return pm.collectionVariables.get("client_id");
-  }
-
-  // Get client_secret from collection variables
-  static get coll_client_secret() {
-    if (pm.collectionVariables.get("client_secret") === undefined) {
-      pm.collectionVariables.set("client_secret", "");
-    }
-    return pm.collectionVariables.get("client_secret");
-  }
-
   // Get client_id from env variables
   static get env_client_id() {
     return pm.environment.get(this.env_client_id_name);
