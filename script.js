@@ -85,41 +85,30 @@ class ServiceConfig {
     pm.collectionVariables.set(this.token_name, value);
   }
 
-  // Compare creeds of Collection and Environment scope
-  // It's done to switch scope easily. For example, your creeds in DEV and STAGE enviroment can be different
-  static compareServiceCreeds() {
-    // Check change CLIENT_IDS
-    if (this.coll_client_id != this.env_client_id) {
-      // Expect: in collection store creeds of actual enviroment
-      pm.collectionVariables.set("client_id", this.env_client_id);
-      // Creeds differance means you switch enviroment. So token not actual
-      this.setToken();
-    }
-    // Check change CLIENT_SECRETS
-    if (this.coll_client_secret != this.env_client_secret) {
-      // Expect: in collection store creeds of actual enviroment
-      pm.collectionVariables.set("client_secret", this.env_client_secret);
-      // Creeds differance means you switch enviroment. So token not actual
-      this.setToken();
-    }
+  // Compare Token host with Enviroment host
+  static isHostChanged() {
+    // !Your host parameter in token can differ. Change name your token parameter "host"
+    tokenHost = JSON.parse(atob(this.token.split(".")[1])).host.match(
+      /(?:\w+\.)+\w+/gm
+    )[0];
+    envHost = this.host;
+    return envHost.indexOf(tokenHost) == -1;
   }
 
   // Check is token null or got expired
   static checkToken() {
-    // We need to make sure that token correspond to enviroment
-    this.compareServiceCreeds();
-    // In this line we know that token correspond to enviroment or equals to empty/null
+    // If host token is empty than we should update it without additional check
+    if (this.token == "") {
+      this.serviceTokenUpdate();
+      return;
+    }
     // Check date of token expiration date
     let exp =
-      this.token == ""
-        ? 0
-        : // !Your token format can differ. Change path to your parameter of token expiration date
-          new Date(
-            JSON.parse(atob(this.token.split(".")[1])).token_expiration_date *
-              1000
-          );
-    // If token is empty or it got expired then update
-    if (this.token == "" || exp < Date.now()) {
+      new Date(
+        JSON.parse(atob(this.token.split(".")[1])).token_expiration_date * 1000
+      ) ?? 0;
+    // If host has been changed or token got expired then update token
+    if (this.isHostChanged() || exp < Date.now()) {
       this.serviceTokenUpdate();
     }
   }
