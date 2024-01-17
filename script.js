@@ -14,6 +14,9 @@ class ServiceConfig {
 
   // Get token from collection with defined name
   static get token() {
+    if (pm.collectionVariables.get(this.token_name) === undefined) {
+      pm.collectionVariables.set(this.token_name, "");
+    }
     return pm.collectionVariables.get(this.token_name);
   }
 
@@ -111,7 +114,10 @@ class ServiceConfig {
       this.token == ""
         ? 0
         : // !Your token format can differ. Change path to your parameter of token expiration date
-          new Date(JSON.parse(atob(this.token.split(".")[1])).token_expiration_date * 1000);
+          new Date(
+            JSON.parse(atob(this.token.split(".")[1])).token_expiration_date *
+              1000
+          );
     // If token is empty or it got expired then update
     if (this.token == "" || exp < Date.now()) {
       this.serviceTokenUpdate();
